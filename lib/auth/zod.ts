@@ -21,3 +21,13 @@ export const userSchema = object({
   message: 'Passwords must match',
   path: ['confirmPassword'],
 })
+
+export const loginSchema = object({
+  username: string()
+    .min(4, 'Username is required'),
+  password: string()
+    .min(8, 'Password is required')
+    .refine((val) => !/\s/.test(val), {
+      message: 'Password should not contain spaces',
+    }),
+})
