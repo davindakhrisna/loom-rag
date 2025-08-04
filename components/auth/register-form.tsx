@@ -33,8 +33,8 @@ export function RegisterForm({
           </div>
           <div className="flex flex-col gap-6">
             {state?.message ? (
-              <div className="py-2 flex justify-center items-center rounded-sm bg-red-100 border border-red-300">
-                <span className="text-sm font-light text-center block">{state?.message}</span>
+              <div className="py-2 flex justify-center items-center rounded-sm border border-red-500">
+                <span className="text-sm font-light text-center text-red-500 block">{state?.message}</span>
               </div>
             ) : null}
             <div className="grid gap-3">

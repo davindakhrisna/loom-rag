@@ -8,7 +8,7 @@ export default function HeroSection() {
       <InteractiveGrid containerClassName="absolute inset-0" className="opacity-30" points={40} />
 
       <ShineBorder
-        className="relative z-10 max-w-6xl mx-auto px-6"
+        className="relative z-10 max-w-6xl mx-auto px-6 py-12"
         borderClassName="border border-white/10 rounded-xl overflow-hidden"
       >
         <div className="text-center mb-16">

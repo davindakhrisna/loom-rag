@@ -3,8 +3,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Logo } from "@/components/ui/logo"
-import { usePathname } from "next/navigation";
-import { Session } from "next-auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,10 +27,10 @@ export function ContantDrop() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Link href="github.com/davindakhrisna" target="_blank">Github</Link>
+            <Link href="https://github.com/davindakhrisna" target="_blank">Github</Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Link href="instagram.com/@kryisnn" target="_blank">Instagram</Link>
+            <Link href="https://instagram.com/@kryisnn" target="_blank">Instagram</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
@@ -75,18 +73,8 @@ function Home() {
   )
 }
 
-function App() {
-  return null
-}
-
-const Navbar = ({ session }: { session: Session | null }) => {
-  const pathname = usePathname();
-
-  if (pathname === "/login" || pathname === "/register") {
-    return null;
-  }
-
-  return session ? <App /> : <Home />;
+const Navbar = () => {
+  return < Home />;
 }
 
 export default Navbar;

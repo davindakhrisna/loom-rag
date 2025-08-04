@@ -4,10 +4,12 @@ import { compareSync } from "bcrypt-ts"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import { loginSchema } from "@/lib/auth/zod"
+import authConfig from "@/auth.config"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
+  ...authConfig,
   pages: {
     signIn: "/login",
   },
@@ -43,23 +45,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     })
   ],
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      const isLogin = !!auth?.user
-      const ProtectedRoutes = ["/dashboard", "/profile", "/note"]
-
-      if (!isLogin && ProtectedRoutes.includes(nextUrl.pathname)) {
-        return Response.redirect(new URL("/login", nextUrl.origin))
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.username = user.username;
       }
-
-      if (isLogin && nextUrl.pathname.startsWith("/login")) {
-        return Response.redirect(new URL("/login", nextUrl.origin))
-      } else if (isLogin && nextUrl.pathname.startsWith("/register")) {
-        return Response.redirect(new URL("/login", nextUrl.origin))
-      } else if (isLogin && nextUrl.pathname.startsWith("/")) {
-        return Response.redirect(new URL("/login", nextUrl.origin))
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.username = token.username as string;
       }
-
-      return true;
+      return session;
     }
   }
 })
