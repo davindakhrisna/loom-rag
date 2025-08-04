@@ -5,13 +5,13 @@ import { Session } from "next-auth"
 import Image from "next/image"
 import {
   BookOpen,
-  Bot,
-  Frame,
+  Book,
+  SquareUser,
   LifeBuoy,
-  Map,
-  PieChart,
   Send,
-  Settings2,
+  Bot,
+  Github,
+  CircleDollarSign,
   SquareTerminal,
 } from "lucide-react"
 
@@ -41,89 +41,34 @@ export function AppSidebar({ session, ...props }: AppSidebarProps) {
     },
     navMain: [
       {
-        title: "Playground",
+        title: "Dashboard",
         url: "#",
-        icon: SquareTerminal,
-        isActive: true,
+        icon: Book,
         items: [
           {
-            title: "History",
-            url: "#",
+            title: "Overview",
+            url: "/dashboard",
           },
           {
-            title: "Starred",
-            url: "#",
-          },
-          {
-            title: "Settings",
-            url: "#",
-          },
-        ],
+            title: "Your Notes",
+            url: "/dashboard/notes",
+          }
+        ]
       },
       {
-        title: "Models",
-        url: "#",
-        icon: Bot,
-        items: [
-          {
-            title: "Genesis",
-            url: "#",
-          },
-          {
-            title: "Explorer",
-            url: "#",
-          },
-          {
-            title: "Quantum",
-            url: "#",
-          },
-        ],
+        title: "Ask Mistral",
+        url: "/mistral",
+        icon: SquareTerminal,
       },
       {
         title: "Documentation",
         url: "#",
         icon: BookOpen,
-        items: [
-          {
-            title: "Introduction",
-            url: "#",
-          },
-          {
-            title: "Get Started",
-            url: "#",
-          },
-          {
-            title: "Tutorials",
-            url: "#",
-          },
-          {
-            title: "Changelog",
-            url: "#",
-          },
-        ],
       },
       {
-        title: "Settings",
+        title: "Community",
         url: "#",
-        icon: Settings2,
-        items: [
-          {
-            title: "General",
-            url: "#",
-          },
-          {
-            title: "Team",
-            url: "#",
-          },
-          {
-            title: "Billing",
-            url: "#",
-          },
-          {
-            title: "Limits",
-            url: "#",
-          },
-        ],
+        icon: SquareUser,
       },
     ],
     navSecondary: [
@@ -140,19 +85,19 @@ export function AppSidebar({ session, ...props }: AppSidebarProps) {
     ],
     projects: [
       {
-        name: "Design Engineering",
-        url: "#",
-        icon: Frame,
+        name: "AI Playground",
+        url: "/playground",
+        icon: Bot,
       },
       {
-        name: "Sales & Marketing",
-        url: "#",
-        icon: PieChart,
+        name: "Repository",
+        url: "https://github.com/davindakhrisna/loom-rag",
+        icon: Github,
       },
       {
-        name: "Travel",
+        name: "Support Creator",
         url: "#",
-        icon: Map,
+        icon: CircleDollarSign,
       },
     ],
   }
