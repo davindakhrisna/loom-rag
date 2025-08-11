@@ -3,7 +3,6 @@
 import { SidebarIcon } from "lucide-react"
 import { usePathname } from "next/navigation";
 import { Session } from "next-auth"
-import { SearchForm } from "@/components/sidebar/search-form"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,7 +19,11 @@ const PATH_TITLES = {
   '/': 'Home',
   '/dashboard': 'Dashboard',
   '/profile': 'Profile',
-  '/settings': 'Settings'
+  '/dashboard/notes': 'Notes',
+  '/community': 'Community',
+  '/mistral': 'Ask Mistral',
+  '/documentation': 'Documentation',
+  '/pomodoro': 'Pomodoro',
 } as const;
 
 type PathTitles = typeof PATH_TITLES;
@@ -49,7 +52,7 @@ export function SiteHeader({ session }: { session: Session | null }) {
           <SidebarIcon />
         </Button>
         <Separator orientation="vertical" className="mr-2 h-4" />
-        <Breadcrumb className="hidden sm:block">
+        <Breadcrumb className="sm:block">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="#">
@@ -62,7 +65,6 @@ export function SiteHeader({ session }: { session: Session | null }) {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <SearchForm className="w-full sm:ml-auto sm:w-auto" />
       </div>
     </header>
   )

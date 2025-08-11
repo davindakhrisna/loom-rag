@@ -30,7 +30,7 @@ export function ContantDrop() {
             <Link href="https://github.com/davindakhrisna" target="_blank">Github</Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Link href="https://instagram.com/@kryisnn" target="_blank">Instagram</Link>
+            <Link href="https://instagram.com/kryisnn" target="_blank">Instagram</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

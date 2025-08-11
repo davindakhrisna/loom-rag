@@ -9,7 +9,7 @@ import {
   SquareUser,
   LifeBuoy,
   Send,
-  Bot,
+  Timer,
   Github,
   CircleDollarSign,
   SquareTerminal,
@@ -42,7 +42,7 @@ export function AppSidebar({ session, ...props }: AppSidebarProps) {
     navMain: [
       {
         title: "Dashboard",
-        url: "#",
+        url: "/dashboard",
         icon: Book,
         items: [
           {
@@ -62,19 +62,19 @@ export function AppSidebar({ session, ...props }: AppSidebarProps) {
       },
       {
         title: "Documentation",
-        url: "#",
+        url: "/documentation",
         icon: BookOpen,
       },
       {
         title: "Community",
-        url: "#",
+        url: "/community",
         icon: SquareUser,
       },
     ],
     navSecondary: [
       {
         title: "Contact Admin",
-        url: "https://instagram.com/@kryisnn",
+        url: "https://instagram.com/kryisnn",
         icon: LifeBuoy,
       },
       {
@@ -85,9 +85,9 @@ export function AppSidebar({ session, ...props }: AppSidebarProps) {
     ],
     projects: [
       {
-        name: "AI Playground",
-        url: "/playground",
-        icon: Bot,
+        name: "Pomodoro",
+        url: "/pomodoro",
+        icon: Timer,
       },
       {
         name: "Repository",
@@ -96,7 +96,7 @@ export function AppSidebar({ session, ...props }: AppSidebarProps) {
       },
       {
         name: "Support Creator",
-        url: "#",
+        url: "https://www.paypal.com/paypalme/DavindaKhrisna",
         icon: CircleDollarSign,
       },
     ],
