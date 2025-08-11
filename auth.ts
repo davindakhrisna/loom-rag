@@ -49,6 +49,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id;
         token.username = user.username;
+        token.punchcard = user.punchcard;
+        token.notesvisibility = user.notesvisibility;
+        token.activity = user.activity;
       }
       return token;
     },
@@ -56,6 +59,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
+        session.user.punchcard = token.punchcard as string;
+        session.user.notesvisibility = token.notesvisibility as boolean;
+        session.user.activity = token.activity as boolean;
       }
       return session;
     }

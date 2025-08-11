@@ -5,6 +5,9 @@ declare module "next-auth" {
   interface User {
     id?: string;
     username?: string;
+    punchcard?: string;
+    notesvisibility?: boolean;
+    activity?: boolean;
   }
 
   interface Session {
@@ -14,6 +17,9 @@ declare module "next-auth" {
       email?: string;
       image?: string;
       username?: string;
+      punchcard?: string;
+      notesvisibility?: boolean;
+      activity?: boolean;
     }
   }
 }
@@ -22,5 +28,8 @@ declare module "next-auth/jwt" {
   interface JWT {
     id?: string;
     username?: string;
+    punchcard?: string;
+    notesvisibility?: boolean;
+    activity?: boolean;
   }
 }

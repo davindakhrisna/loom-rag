@@ -3,7 +3,8 @@ import { object, string } from 'zod';
 {/* Form Validator */ }
 export const userSchema = object({
   name: string()
-    .min(4, 'Name is required'),
+    .min(4, 'Name is required')
+    .max(16, 'Name should be at most 16 characters long'),
   username: string()
     .min(4, 'Username is required')
     .max(12, 'Username should be at most 12 characters long')

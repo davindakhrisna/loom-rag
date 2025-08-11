@@ -19,5 +19,7 @@ model User {
   name     String
   username String  @unique
   password String?
-  punchcard String @default("")
+  punchcard String @default("Im a helpful AI assistant, ready to serve your needs.")
+  notesvisibility Boolean @default(false)
+  activity Boolean @default(false)
 }

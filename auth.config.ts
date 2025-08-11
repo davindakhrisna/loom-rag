@@ -23,6 +23,7 @@ export default {
       if (user) {
         token.id = user.id;
         token.username = user.username;
+        token.punchcard = user.punchcard;
       }
       return token;
     },

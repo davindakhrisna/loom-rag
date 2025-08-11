@@ -1,6 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/sidebar/site-header"
-import { auth, signOut } from "@/auth"
+import { auth } from "@/auth"
 import {
   SidebarInset,
   SidebarProvider,

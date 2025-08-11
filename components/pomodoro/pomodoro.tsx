@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { Play, Pause, RotateCcw, SettingsIcon, Volume2, VolumeX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -44,14 +44,48 @@ export default function PomodoroTimer() {
 
   // Initialize audio
   useEffect(() => {
-    audioRef.current = new Audio("/audio/notification.wav")
-    audioRef.current.preload = "auto"
+    const audio = new Audio("/audio/notification.wav")
+    audio.preload = "auto"
+    audioRef.current = audio
+
     return () => {
       if (audioRef.current) {
+        audioRef.current.pause()
         audioRef.current = null
       }
     }
   }, [])
+
+  // Prime audio on first user interaction
+  const primeAudio = useCallback(() => {
+    if (audioRef.current && settings.soundEnabled) {
+      audioRef.current.play().then(() => {
+        audioRef.current?.pause()
+        audioRef.current!.currentTime = 0
+      }).catch(() => { /* ignore autoplay error */ })
+    }
+  }, [settings.soundEnabled])
+
+  // Play sound notification
+  const playSound = useCallback(() => {
+    if (settings.soundEnabled && audioRef.current) {
+      audioRef.current.currentTime = 0
+      audioRef.current.play().catch((error) => {
+        console.warn("Failed to play sound (autoplay blocked?)", error)
+      })
+    }
+  }, [settings.soundEnabled])
+
+  // Update timer duration when mode or settings change
+  useEffect(() => {
+    if (mode === "work") {
+      setTimeLeft(settings.workDuration * 60)
+    } else if (mode === "shortBreak") {
+      setTimeLeft(settings.shortBreakDuration * 60)
+    } else {
+      setTimeLeft(settings.longBreakDuration * 60)
+    }
+  }, [mode, settings])
 
   // Timer logic
   useEffect(() => {
@@ -76,72 +110,81 @@ export default function PomodoroTimer() {
   useEffect(() => {
     if (timeLeft === 0 && isRunning) {
       setIsRunning(false)
-
-      // Play sound notification
-      if (settings.soundEnabled && audioRef.current) {
-        audioRef.current.play().catch(() => {
-          // Ignore audio play errors
-        })
-      }
+      playSound()
 
       if (mode === "work") {
         const newCompletedSessions = completedSessions + 1
         setCompletedSessions(newCompletedSessions)
 
-        // Determine next break type
         const isLongBreak = newCompletedSessions % settings.sessionsUntilLongBreak === 0
         const nextMode = isLongBreak ? "longBreak" : "shortBreak"
         setMode(nextMode)
 
-        const nextDuration = isLongBreak ? settings.longBreakDuration : settings.shortBreakDuration
-        setTimeLeft(nextDuration * 60)
+        const nextDuration = isLongBreak
+          ? settings.longBreakDuration * 60
+          : settings.shortBreakDuration * 60
+        setTimeLeft(nextDuration)
 
         if (settings.autoStartBreaks) {
           setIsRunning(true)
         }
       } else {
-        // Break finished, switch to work
         setMode("work")
         setTimeLeft(settings.workDuration * 60)
-
         if (settings.autoStartWork) {
           setIsRunning(true)
         }
       }
     }
-  }, [timeLeft, isRunning, mode, completedSessions, settings])
+  }, [
+    timeLeft,
+    isRunning,
+    mode,
+    completedSessions,
+    settings.autoStartBreaks,
+    settings.autoStartWork,
+    settings.sessionsUntilLongBreak,
+    settings.workDuration,
+    settings.shortBreakDuration,
+    settings.longBreakDuration,
+    playSound,
+  ])
 
-  // Update timer when settings change
-  useEffect(() => {
-    if (mode === "work") {
-      setTimeLeft(settings.workDuration * 60)
-    } else if (mode === "shortBreak") {
-      setTimeLeft(settings.shortBreakDuration * 60)
-    } else {
-      setTimeLeft(settings.longBreakDuration * 60)
-    }
-  }, [settings, mode])
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
-  }
-
-  const getTotalTime = () => {
+  // Memoize total time and progress
+  const totalTime = useMemo(() => {
     if (mode === "work") return settings.workDuration * 60
     if (mode === "shortBreak") return settings.shortBreakDuration * 60
     return settings.longBreakDuration * 60
-  }
+  }, [mode, settings])
 
-  const getProgress = () => {
-    const total = getTotalTime()
-    return ((total - timeLeft) / total) * 100
-  }
+  const progress = useMemo(() => {
+    return totalTime > 0 ? ((totalTime - timeLeft) / totalTime) * 100 : 0
+  }, [totalTime, timeLeft])
 
-  const handleStart = () => setIsRunning(true)
-  const handlePause = () => setIsRunning(false)
-  const handleReset = () => {
+  const CIRCUMFERENCE = 2 * Math.PI * 45 // Precompute circumference
+
+  const formatTime = useCallback((seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
+  }, [])
+
+  // Unified settings updater
+  const updateSetting = useCallback(<K extends keyof Settings>(key: K, value: Settings[K]) => {
+    setSettings((prev) => ({ ...prev, [key]: value }))
+  }, [])
+
+  // Controls
+  const handleStart = useCallback(() => {
+    setIsRunning(true)
+    primeAudio() // Unlock audio on first interaction
+  }, [primeAudio])
+
+  const handlePause = useCallback(() => {
+    setIsRunning(false)
+  }, [])
+
+  const handleReset = useCallback(() => {
     setIsRunning(false)
     if (mode === "work") {
       setTimeLeft(settings.workDuration * 60)
@@ -150,29 +193,23 @@ export default function PomodoroTimer() {
     } else {
       setTimeLeft(settings.longBreakDuration * 60)
     }
-  }
+  }, [mode, settings])
 
-  const getModeLabel = () => {
+  const getModeLabel = useCallback(() => {
     switch (mode) {
-      case "work":
-        return "Focus Time"
-      case "shortBreak":
-        return "Short Break"
-      case "longBreak":
-        return "Long Break"
+      case "work": return "Focus Time"
+      case "shortBreak": return "Short Break"
+      case "longBreak": return "Long Break"
     }
-  }
+  }, [mode])
 
-  const getModeColor = () => {
+  const getModeColor = useCallback(() => {
     switch (mode) {
-      case "work":
-        return "bg-red-500"
-      case "shortBreak":
-        return "bg-green-500"
-      case "longBreak":
-        return "bg-blue-500"
+      case "work": return "bg-red-500"
+      case "shortBreak": return "bg-green-500"
+      case "longBreak": return "bg-blue-500"
     }
-  }
+  }, [mode])
 
   return (
     <div className="h-full flex items-center justify-center p-4">
@@ -184,7 +221,7 @@ export default function PomodoroTimer() {
             </Badge>
             <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
               <DialogTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" aria-label="Open settings">
                   <SettingsIcon className="h-4 w-4" />
                 </Button>
               </DialogTrigger>
@@ -195,7 +232,7 @@ export default function PomodoroTimer() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="work">Work (minutes)</Label>
+                      <Label htmlFor="work" className="mb-2">Work (minutes)</Label>
                       <Input
                         id="work"
                         type="number"
@@ -203,15 +240,12 @@ export default function PomodoroTimer() {
                         max="60"
                         value={settings.workDuration}
                         onChange={(e) =>
-                          setSettings((prev) => ({
-                            ...prev,
-                            workDuration: Number.parseInt(e.target.value) || 25,
-                          }))
+                          updateSetting("workDuration", Math.max(1, parseInt(e.target.value) || 25))
                         }
                       />
                     </div>
                     <div>
-                      <Label htmlFor="shortBreak">Short Break</Label>
+                      <Label htmlFor="shortBreak" className="mb-2">Short Break</Label>
                       <Input
                         id="shortBreak"
                         type="number"
@@ -219,17 +253,14 @@ export default function PomodoroTimer() {
                         max="30"
                         value={settings.shortBreakDuration}
                         onChange={(e) =>
-                          setSettings((prev) => ({
-                            ...prev,
-                            shortBreakDuration: Number.parseInt(e.target.value) || 5,
-                          }))
+                          updateSetting("shortBreakDuration", Math.max(1, parseInt(e.target.value) || 5))
                         }
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="longBreak">Long Break</Label>
+                      <Label htmlFor="longBreak" className="mb-2">Long Break</Label>
                       <Input
                         id="longBreak"
                         type="number"
@@ -237,15 +268,12 @@ export default function PomodoroTimer() {
                         max="60"
                         value={settings.longBreakDuration}
                         onChange={(e) =>
-                          setSettings((prev) => ({
-                            ...prev,
-                            longBreakDuration: Number.parseInt(e.target.value) || 15,
-                          }))
+                          updateSetting("longBreakDuration", Math.max(1, parseInt(e.target.value) || 15))
                         }
                       />
                     </div>
                     <div>
-                      <Label htmlFor="sessions">Sessions until Long Break</Label>
+                      <Label htmlFor="sessions" className="mb-2">Sessions until Long Break</Label>
                       <Input
                         id="sessions"
                         type="number"
@@ -253,10 +281,7 @@ export default function PomodoroTimer() {
                         max="10"
                         value={settings.sessionsUntilLongBreak}
                         onChange={(e) =>
-                          setSettings((prev) => ({
-                            ...prev,
-                            sessionsUntilLongBreak: Number.parseInt(e.target.value) || 4,
-                          }))
+                          updateSetting("sessionsUntilLongBreak", Math.max(2, parseInt(e.target.value) || 4))
                         }
                       />
                     </div>
@@ -267,12 +292,7 @@ export default function PomodoroTimer() {
                       <Switch
                         id="autoBreaks"
                         checked={settings.autoStartBreaks}
-                        onCheckedChange={(checked) =>
-                          setSettings((prev) => ({
-                            ...prev,
-                            autoStartBreaks: checked,
-                          }))
-                        }
+                        onCheckedChange={(checked) => updateSetting("autoStartBreaks", checked)}
                       />
                     </div>
                     <div className="flex items-center justify-between">
@@ -280,12 +300,7 @@ export default function PomodoroTimer() {
                       <Switch
                         id="autoWork"
                         checked={settings.autoStartWork}
-                        onCheckedChange={(checked) =>
-                          setSettings((prev) => ({
-                            ...prev,
-                            autoStartWork: checked,
-                          }))
-                        }
+                        onCheckedChange={(checked) => updateSetting("autoStartWork", checked)}
                       />
                     </div>
                     <div className="flex items-center justify-between">
@@ -293,12 +308,7 @@ export default function PomodoroTimer() {
                       <Switch
                         id="sound"
                         checked={settings.soundEnabled}
-                        onCheckedChange={(checked) =>
-                          setSettings((prev) => ({
-                            ...prev,
-                            soundEnabled: checked,
-                          }))
-                        }
+                        onCheckedChange={(checked) => updateSetting("soundEnabled", checked)}
                       />
                     </div>
                   </div>
@@ -328,21 +338,22 @@ export default function PomodoroTimer() {
                 stroke="currentColor"
                 strokeWidth="2"
                 fill="none"
-                strokeDasharray={`${2 * Math.PI * 45}`}
-                strokeDashoffset={`${2 * Math.PI * 45 * (1 - getProgress() / 100)}`}
-                className={`transition-all duration-1000 ${mode === "work" ? "text-red-500" : mode === "shortBreak" ? "text-green-500" : "text-blue-500"
-                  }`}
+                strokeDasharray={CIRCUMFERENCE}
+                strokeDashoffset={CIRCUMFERENCE * (1 - progress / 100)}
+                className={`transition-all duration-1000 ${mode === "work" ? "text-red-500" : mode === "shortBreak" ? "text-green-500" : "text-blue-500"}`}
                 strokeLinecap="round"
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <div className="text-4xl font-mono font-bold">{formatTime(timeLeft)}</div>
+                <div className="text-4xl font-mono font-bold" aria-live="polite">
+                  {formatTime(timeLeft)}
+                </div>
                 <div className="text-sm text-muted-foreground mt-1">
                   {settings.soundEnabled ? (
-                    <Volume2 className="h-4 w-4 mx-auto" />
+                    <Volume2 className="h-4 w-4 mx-auto" aria-label="Sound enabled" />
                   ) : (
-                    <VolumeX className="h-4 w-4 mx-auto" />
+                    <VolumeX className="h-4 w-4 mx-auto" aria-label="Sound disabled" />
                   )}
                 </div>
               </div>
@@ -352,30 +363,50 @@ export default function PomodoroTimer() {
           {/* Controls */}
           <div className="flex justify-center gap-4">
             {!isRunning ? (
-              <Button onClick={handleStart} size="lg" className="px-8">
+              <Button onClick={handleStart} size="lg" className="px-8" aria-label="Start timer">
                 <Play className="h-5 w-5 mr-2" />
                 Start
               </Button>
             ) : (
-              <Button onClick={handlePause} size="lg" variant="secondary" className="px-8">
+              <Button
+                onClick={handlePause}
+                size="lg"
+                variant="secondary"
+                className="px-8"
+                aria-label="Pause timer"
+              >
                 <Pause className="h-5 w-5 mr-2" />
                 Pause
               </Button>
             )}
-            <Button onClick={handleReset} size="lg" variant="outline">
+            <Button
+              onClick={handleReset}
+              size="lg"
+              variant="outline"
+              aria-label="Reset timer"
+            >
               <RotateCcw className="h-5 w-5" />
             </Button>
           </div>
 
           {/* Session Progress */}
           <div className="text-center">
-            <div className="text-sm text-muted-foreground mb-2">Completed Sessions: {completedSessions}</div>
+            <div className="text-sm text-muted-foreground mb-2">
+              Completed Sessions: {completedSessions}
+            </div>
             <div className="flex justify-center gap-1">
               {Array.from({ length: settings.sessionsUntilLongBreak }).map((_, i) => (
                 <div
                   key={i}
-                  className={`w-3 h-3 rounded-full ${i < (completedSessions % settings.sessionsUntilLongBreak) ? "bg-primary" : "bg-muted-foreground/20"
+                  className={`w-3 h-3 rounded-full ${i < (completedSessions % settings.sessionsUntilLongBreak)
+                    ? "bg-primary"
+                    : "bg-muted-foreground/20"
                     }`}
+                  aria-label={
+                    i < completedSessions % settings.sessionsUntilLongBreak
+                      ? `Completed session ${i + 1}`
+                      : `Pending session ${i + 1}`
+                  }
                 />
               ))}
             </div>
