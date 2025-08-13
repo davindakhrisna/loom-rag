@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { Play, Pause, RotateCcw, SettingsIcon, Volume2, VolumeX } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardDescription, Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -212,7 +212,7 @@ export default function PomodoroTimer() {
   }, [mode])
 
   return (
-    <div className="h-full flex items-center justify-center p-4">
+    <div className="h-full flex flex-col items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-between">
@@ -413,6 +413,7 @@ export default function PomodoroTimer() {
           </div>
         </CardContent>
       </Card>
+      <p className="mt-8 text-sm text-gray-400">Disclamer: Your progress will dissapear if you move to other page</p>
     </div>
   )
 }

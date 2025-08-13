@@ -36,7 +36,7 @@ export const Register = async (prevMethod: unknown, formData: FormData) => {
       }
     })
   } catch {
-    return { message: "Registration Failed" };
+    return { message: "Username is taken!" };
   }
   redirect("/login");
 }
