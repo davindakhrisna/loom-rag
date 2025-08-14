@@ -2,10 +2,11 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Edit, Plus, FileText, Heart, ChevronLeft, Sunrise, Moon, Sun, X, ChevronRight } from "lucide-react"
+import { Edit, Plus, Heart, ChevronLeft, Sunrise, Moon, Sun, X, ChevronRight } from "lucide-react"
 import { useState } from "react"
 import * as React from "react"
 import { Calendar } from "@/components/ui/calendar"
+import { DialogTemplate } from "@/components/dashboard/notes/dialog"
 
 export function TodoListSection() {
 
@@ -127,7 +128,7 @@ export function TodaysNotesSection() {
               size="sm"
               onClick={prevPage}
               disabled={currentPage === 0}
-              className="border-gray-600 text-gray-300 hover:bg-gray-700 bg-transparent"
+              className="cursor-pointer border-gray-600 text-gray-300 hover:bg-gray-700 bg-transparent"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
@@ -139,7 +140,7 @@ export function TodaysNotesSection() {
               size="sm"
               onClick={nextPage}
               disabled={currentPage === totalPages - 1}
-              className="border-gray-600 text-gray-300 hover:bg-gray-700 bg-transparent"
+              className="cursor-pointer border-gray-600 text-gray-300 hover:bg-gray-700 bg-transparent"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>
@@ -171,10 +172,7 @@ export function MotivationBlock() {
 export function ActionButtons() {
   return (
     <div className="h-fit">
-      <Button className="cursor-pointer w-full">
-        <FileText className="w-4 h-4 mr-2" />
-        Templates
-      </Button>
+      <DialogTemplate />
     </div>
   )
 }
