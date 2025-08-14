@@ -4,12 +4,11 @@ import Image from "next/image"
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen pt-32 pb-16 overflow-hidden bg-black">
+    <section className="relative min-h-screen pt-32 pb-16 overflow-hidden">
       <InteractiveGrid containerClassName="absolute inset-0" className="opacity-30" points={40} />
 
       <ShineBorder
-        className="relative z-10 max-w-6xl mx-auto px-6 py-12"
-        borderClassName="border border-white/10 rounded-xl overflow-hidden"
+        className="relative z-10 max-w-6xl mx-auto p-12 rounded-3xl bg-white/50 shadow-2xl backdrop-blur-xs dark:bg-black/90 border border-black/30 dark:border-white/30 overflow-hidden"
       >
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
@@ -17,7 +16,7 @@ export default function HeroSection() {
             <br />
             Matters
           </h1>
-          <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+          <p className="text-gray-800 dark:text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
             Keep up with yourself by staying and maintaining your focus. Kill the distractions and
             see the result by following the rule of Prime.
           </p>

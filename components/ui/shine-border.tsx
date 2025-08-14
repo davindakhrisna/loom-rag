@@ -37,7 +37,7 @@ export function ShineBorder({ children, className = "", borderClassName = "", du
       className={`group relative ${className}`}
       style={{ "--shine-duration": `${duration}ms` } as React.CSSProperties}
     >
-      <div className={`absolute inset-0 rounded-xl ${borderClassName}`}>
+      <div className={`absolute inset-0 rounded-3xl border border-white/20 ${borderClassName}`}>
         <div
           className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"
           style={{
