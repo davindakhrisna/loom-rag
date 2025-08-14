@@ -140,6 +140,18 @@ export function TodoListSection() {
       {/* Todo Drawer */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <SheetContent side="right" className="w-[400px] sm:w-[540px] ml-auto mr-0 flex flex-col">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={`absolute left-0 top-1/2 -translate-x-1/2 rounded-full cursor-pointer w-8 h-12 shadow-md hover:opacity-90 ${
+              activeTimeSlot === 'morning' ? 'bg-red-500 hover:bg-red-600' : 
+              activeTimeSlot === 'noon' ? 'bg-amber-500 hover:bg-amber-600' : 
+              'bg-blue-500 hover:bg-blue-600'
+            }`}
+            onClick={() => setIsDrawerOpen(false)}
+          >
+            {getTimeSlotIcon(activeTimeSlot)}
+          </Button>
           <SheetHeader className="flex-shrink-0">
             <SheetTitle className="flex items-center gap-2">
               {getTimeSlotIcon(activeTimeSlot)}
