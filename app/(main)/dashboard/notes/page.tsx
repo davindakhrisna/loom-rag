@@ -1,4 +1,4 @@
-import { TodoListSection, TodaysNotesSection, MotivationBlock, ActionButtons, CalendarSection } from "@/components/dashboard/notes/notes";
+import { TodoListSection, ActionButton, TodaysNotesSection, MotivationBlock, CalendarSection } from "@/components/dashboard/notes/notes";
 
 const Notes = () => {
   return (
@@ -19,7 +19,7 @@ const Notes = () => {
           {/* Right Section - Takes 1 column on large screens */}
           <div className="space-y-6">
             <MotivationBlock />
-            <ActionButtons />
+            <ActionButton />
             <CalendarSection />
           </div>
         </div>

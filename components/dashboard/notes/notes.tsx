@@ -1,15 +1,14 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Edit, Plus, Heart, ChevronLeft, Sunrise, Moon, Sun, X, ChevronRight } from "lucide-react"
 import { useState } from "react"
 import * as React from "react"
+import Link from "next/link"
+import { Edit, Plus, Heart, ChevronLeft, Asterisk, X, ChevronRight, Sunrise, Moon, Sun } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar } from "@/components/ui/calendar"
-import { DialogTemplate } from "@/components/dashboard/notes/dialog"
 
 export function TodoListSection() {
-
   return (
     <Card className="h-fit">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -18,25 +17,32 @@ export function TodoListSection() {
       <CardContent>
         <div className="grid grid-cols-3 gap-4">
           {/* Morning Block */}
-          <Card className="justify-center items-center flex min-h-28 bg-red-500 cursor-pointer hover:bg-red-600 transition-colors">
-            <CardContent className="flex flex-col justify-center items-center gap-2">
-              <Sunrise />
-            </CardContent>
-          </Card>
+          <Link href="/dashboard/notes/todo">
+            <Card className="justify-center items-center flex min-h-28 bg-red-500 cursor-pointer hover:bg-red-600 transition-colors">
+              <CardContent className="flex flex-col justify-center items-center gap-2">
+                <Sunrise />
+              </CardContent>
+            </Card>
+          </Link>
 
           {/* Noon Block */}
-          <Card className="justify-center items-center flex min-h-28 bg-amber-400 cursor-pointer hover:bg-amber-500 transition-colors">
-            <CardContent className="flex flex-col justify-center items-center gap-2">
-              <Sun />
-            </CardContent>
-          </Card>
+          <Link href="/dashboard/notes/todo">
+            <Card className="justify-center items-center flex min-h-28 bg-amber-400 cursor-pointer hover:bg-amber-500 transition-colors">
+              <CardContent className="flex flex-col justify-center items-center gap-2">
+                <Sun />
+              </CardContent>
+            </Card>
+          </Link>
 
           {/* Evening Block */}
-          <Card className="justify-center items-center flex min-h-28 bg-indigo-700 cursor-pointer hover:bg-blue-900 transition-colors">
-            <CardContent className="flex flex-col justify-center items-center gap-2">
-              <Moon />
-            </CardContent>
-          </Card>
+          <Link href="/dashboard/notes/todo">
+            <Card className="justify-center items-center flex min-h-28 bg-indigo-700 cursor-pointer hover:bg-blue-900 transition-colors">
+              <CardContent className="flex flex-col justify-center items-center gap-2">
+                <Moon />
+              </CardContent>
+            </Card>
+          </Link>
+
         </div>
       </CardContent>
     </Card>
@@ -93,10 +99,12 @@ export function TodaysNotesSection() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-xl text-white">Today&apos;s Notes</CardTitle>
-        <Button variant="outline" size="sm" className="border-gray-600 cursor-pointer text-gray-300 hover:bg-gray-700 bg-transparent">
-          <Plus className="w-4 h-4 mr-2" />
-          New Note
-        </Button>
+        <Link href="/dashboard/notes/log">
+          <Button variant="outline" size="sm" className="border-gray-600 cursor-pointer text-gray-300 hover:bg-gray-700 bg-transparent">
+            <Plus className="w-4 h-4 mr-2" />
+            New Note
+          </Button>
+        </Link>
       </CardHeader>
       <CardContent className="sm:min-h-90.5 flex flex-col justify-between">
         <div className="space-y-4">
@@ -169,18 +177,10 @@ export function MotivationBlock() {
   )
 }
 
-export function ActionButtons() {
-  return (
-    <div className="h-fit">
-      <DialogTemplate />
-    </div>
-  )
-}
-
 export function CalendarSection() {
   const [date, setDate] = React.useState<Date | undefined>(new Date())
   return (
-    <Card className="mb-8">
+    <Card className="mb-8 min-h-117">
       <CardHeader className="flex flex-col items-center justify-center">
         <CardTitle className="text-xl text-white">Progress Calendar</CardTitle>
         <CardDescription>Shows how your progress been going</CardDescription>
@@ -194,9 +194,18 @@ export function CalendarSection() {
           captionLayout="dropdown"
         />
       </CardContent>
-      <CardFooter className="mx-auto">
-        Current Level: 69
-      </CardFooter>
     </Card>
+  )
+}
+
+export function ActionButton() {
+  return (
+    <Button className="w-full cursor-pointer">
+      <Link href="/dashboard" className="w-full flex items-center justify-center gap-1">
+        <Asterisk />
+        Your Current Level: 69
+
+      </Link>
+    </Button>
   )
 }

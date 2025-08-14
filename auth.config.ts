@@ -6,7 +6,7 @@ export default {
   callbacks: {
     async authorized({ auth, request: { nextUrl } }) {
       const isLogin = !!auth?.user
-      const ProtectedRoutes = ["/dashboard", "/profile", "/note"]
+      const ProtectedRoutes = ["/dashboard", "/profile", "/dashboard/notes", "/pomodoro", "/dashboard/notes/log", "/dashboard/notes/todo"]
       const ProtectedLoggedIn = ["/login", " / register"]
 
       if (!isLogin && ProtectedRoutes.includes(nextUrl.pathname)) {
