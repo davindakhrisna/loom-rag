@@ -6,7 +6,6 @@ import { Session } from "next-auth"
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
@@ -55,9 +54,7 @@ export function SiteHeader({ session }: { session: Session | null }) {
         <Breadcrumb className="sm:block">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="#">
-                {session?.user?.name || "Main"}&apos;s Workspace
-              </BreadcrumbLink>
+              {session?.user?.name || "Main"}&apos;s Workspace
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>

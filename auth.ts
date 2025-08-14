@@ -51,7 +51,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.username = user.username;
         token.punchcard = user.punchcard;
         token.notesvisibility = user.notesvisibility;
-        token.activity = user.activity;
+        token.activityvisibility = user.activityvisibility;
       }
       return token;
     },
@@ -61,7 +61,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.username = token.username as string;
         session.user.punchcard = token.punchcard as string;
         session.user.notesvisibility = token.notesvisibility as boolean;
-        session.user.activity = token.activity as boolean;
+        session.user.activityvisibility = token.activityvisibility as boolean;
       }
       return session;
     }

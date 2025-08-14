@@ -7,7 +7,7 @@ declare module "next-auth" {
     username?: string;
     punchcard?: string;
     notesvisibility?: boolean;
-    activity?: boolean;
+    activityvisibility?: boolean;
   }
 
   interface Session {
@@ -19,7 +19,7 @@ declare module "next-auth" {
       username?: string;
       punchcard?: string;
       notesvisibility?: boolean;
-      activity?: boolean;
+      activityvisibility?: boolean;
     }
   }
 }
@@ -30,6 +30,6 @@ declare module "next-auth/jwt" {
     username?: string;
     punchcard?: string;
     notesvisibility?: boolean;
-    activity?: boolean;
+    activityvisibility?: boolean;
   }
 }

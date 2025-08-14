@@ -61,7 +61,7 @@ export const updateActivityVisibility = async (visible: boolean) => {
   try {
     await prisma.user.update({
       where: { username: session.user.username },
-      data: { activity: visible },
+      data: { activityvisibility: visible },
     })
     return { success: true, message: "Activity visibility updated" }
   } catch (error) {

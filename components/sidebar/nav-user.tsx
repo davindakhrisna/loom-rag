@@ -78,14 +78,14 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <Link href="/profile" className="cursor-pointer" passHref>
-              <DropdownMenuItem>
+            <Link href="/profile" passHref>
+              <DropdownMenuItem className="cursor-pointer">
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
             </Link>
-            <button className="cursor-pointer w-full" onClick={() => signOut()}>
-              <DropdownMenuItem>
+            <button className="w-full" onClick={() => signOut()}>
+              <DropdownMenuItem className="cursor-pointer">
                 <LogOut />
                 Log Out
               </DropdownMenuItem>

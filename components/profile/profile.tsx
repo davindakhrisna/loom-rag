@@ -25,7 +25,7 @@ export default function ProfilePage({ session }: ProfileProps) {
   const [aiPersonality, setAiPersonality] = useState(session?.user?.punchcard || "I am a helpful AI assistant.")
   const [privacySettings, setPrivacySettings] = useState({
     notesVisible: session?.user?.notesvisibility || false,
-    activityVisible: session?.user?.activity || false,
+    activityVisible: session?.user?.activityvisibility || false,
   })
 
   const handleActivityToggle = async () => {
