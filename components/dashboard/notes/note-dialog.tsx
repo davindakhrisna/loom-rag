@@ -16,40 +16,44 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Plus, Edit3 } from "lucide-react"
-import { Note } from "@/types/notes"
-
-interface NoteDialogProps {
-  note?: Note
-  onSave: (noteData: Omit<Note, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>
-  trigger?: React.ReactNode
-}
+import { Plus } from "lucide-react"
+import { CreateNoteData, UpdateNoteData, NoteDialogProps, FormData } from "@/types/notes"
 
 export function NoteDialog({ note, onSave, trigger }: NoteDialogProps) {
   const [open, setOpen] = useState(false)
-  const [formData, setFormData] = useState<Omit<Note, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>({
+  const [formData, setFormData] = useState<FormData>({
+    id: note?.id,
     title: note?.title || "",
-    description: note?.description || "",
+    description: note?.description || null,
     content: note?.content || "",
   })
 
+  // Logic Editing
   const isEditing = !!note
 
+  // Handle Save
   const handleSave = async () => {
     if (!formData.title.trim()) return
 
     try {
       if (onSave) {
-        await onSave(formData)
+        const noteData = isEditing
+          ? { ...formData, id: note!.id } as UpdateNoteData
+          : {
+            title: formData.title,
+            description: formData.description,
+            content: formData.content
+          } as CreateNoteData
+
+        await onSave(noteData)
       }
-      
       if (!isEditing) {
-        setFormData({ title: "", description: "", content: "" })
+        setFormData({ id: "", title: "", description: "", content: "" })
       }
       setOpen(false)
     } catch (error) {
       console.error('Error saving note:', error)
-      throw error // Re-throw to allow parent to handle the error
+      throw error
     }
   }
 
@@ -57,9 +61,17 @@ export function NoteDialog({ note, onSave, trigger }: NoteDialogProps) {
     setOpen(newOpen)
     if (newOpen && note) {
       setFormData({
+        id: note.id,
         title: note.title,
-        description: note.description || "",
+        description: note.description,
         content: note.content,
+      })
+    } else if (!newOpen && !isEditing) {
+      // Reset form when closing dialog for new notes
+      setFormData({
+        title: "",
+        description: null,
+        content: "",
       })
     }
   }
@@ -68,18 +80,9 @@ export function NoteDialog({ note, onSave, trigger }: NoteDialogProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant={isEditing ? "ghost" : "default"} size={isEditing ? "sm" : "default"}>
-            {isEditing ? (
-              <>
-                <Edit3 className="h-4 w-4 mr-2" />
-                Edit
-              </>
-            ) : (
-              <>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Note
-              </>
-            )}
+          <Button className="cursor-pointer" variant="default" size="default">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Note
           </Button>
         )}
       </DialogTrigger>
@@ -92,7 +95,6 @@ export function NoteDialog({ note, onSave, trigger }: NoteDialogProps) {
               : "Create a new note with a title, description, and content."}
           </DialogDescription>
         </DialogHeader>
-
         <div className="space-y-6 py-4">
           <div className="space-y-2">
             <Label htmlFor="title" className="text-sm font-medium">
@@ -102,9 +104,11 @@ export function NoteDialog({ note, onSave, trigger }: NoteDialogProps) {
               id="title"
               placeholder="Enter note title..."
               value={formData.title}
+              maxLength={16}
               onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
               className="text-base"
             />
+            <div className="text-xs text-muted-foreground mb-4 flex-shrink-0">{formData.title.length}/16 characters</div>
           </div>
 
           <div className="space-y-2">
@@ -129,16 +133,16 @@ export function NoteDialog({ note, onSave, trigger }: NoteDialogProps) {
               placeholder="Write your note content here..."
               value={formData.content}
               onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
-              className="min-h-[200px] text-base resize-none"
+              className="h-[200px] w-full text-base resize-none whitespace-pre-wrap break-words"
             />
           </div>
         </div>
 
         <DialogFooter className="gap-3">
-          <Button variant="outline" onClick={() => setOpen(false)} className="px-6">
+          <Button variant="outline" onClick={() => setOpen(false)} className="px-6 cursor-pointer">
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={!formData.title.trim()} className="px-6">
+          <Button onClick={handleSave} disabled={!formData.title.trim()} className="px-6 cursor-pointer">
             {isEditing ? "Save Changes" : "Add Note"}
           </Button>
         </DialogFooter>

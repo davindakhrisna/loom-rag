@@ -23,7 +23,7 @@ const Notes = async () => {
 
           <div className="space-y-6">
             <MotivationBlock />
-            <ActionButton />
+            <ActionButton session={session} />
             <CalendarSection />
             <ActionCommunity />
           </div>

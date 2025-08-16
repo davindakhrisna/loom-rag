@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Session } from "next-auth"
-import { getNotes, createNote, updateNote } from '@/lib/notes/actions'
+import { getNotes, createNote, updateNote, deleteNote } from '@/lib/dashboard/notes/note/actions'
+import { CreateNoteData, UpdateNoteData } from '@/types/notes'
 import { ChevronLeft, X, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { NoteDialog } from "@/components/dashboard/notes/note-dialog"
@@ -13,7 +14,6 @@ interface NotesProps {
   session: Session | null;
 }
 
-
 export function TodaysNotesSection({ session }: NotesProps) {
   const [notes, setNotes] = useState<Note[]>([])
   const [currentPage, setCurrentPage] = useState(0)
@@ -21,6 +21,7 @@ export function TodaysNotesSection({ session }: NotesProps) {
   const [error, setError] = useState<string | null>(null)
   const notesPerPage = 3
 
+  // Fetch Notes
   useEffect(() => {
     const fetchNotes = async () => {
       if (session?.user?.id) {
@@ -40,9 +41,9 @@ export function TodaysNotesSection({ session }: NotesProps) {
     fetchNotes()
   }, [session?.user?.id])
 
+  // Pagination
   const totalPages = Math.ceil(notes.length / notesPerPage)
   const currentNotes = notes.slice(currentPage * notesPerPage, (currentPage + 1) * notesPerPage)
-
   const nextPage = () => {
     if (currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1)
@@ -54,40 +55,42 @@ export function TodaysNotesSection({ session }: NotesProps) {
     }
   }
 
-  const handleSaveNote = async (noteData: Omit<Note, 'id' | 'userId' | 'createdAt' | 'updatedAt'> & { id?: string }) => {
+  // Handle Save Note
+  const handleSaveNote = async (noteData: CreateNoteData | UpdateNoteData) => {
     const userId = session?.user?.id;
-    if (!userId) {
-      setError('You must be logged in to save notes')
-      return;
-    }
-
     try {
       setIsLoading(true);
       setError(null);
 
-      if (noteData.id) {
+      if ('id' in noteData) {
         // For updates
-        const updateData = {
-          id: noteData.id,
-          ...noteData
-        };
-        await updateNote(updateData, userId);
+        if (!noteData.id) {
+          throw new Error('Expected Notes, Returns Nothing');
+        }
+        await updateNote({ ...noteData, id: noteData.id });
       } else {
         // For new notes
-        const { id, ...newNoteData } = noteData;
-        await createNote(newNoteData, userId);
+        await createNote(noteData, userId!);
       }
 
       // Refresh the notes list
-      const updatedNotes = await getNotes(userId);
+      const updatedNotes = await getNotes(userId!);
       setNotes(updatedNotes);
     } catch (error) {
       console.error('Error saving note:', error);
       setError('Failed to save note. Please try again.');
-      throw error; // Re-throw to let the dialog know the save failed
+      throw error;
     } finally {
       setIsLoading(false);
     }
+  }
+
+  const handleDeleteNote = async (noteId: string) => {
+    deleteNote(noteId);
+
+    // Refresh the notes list after deletion
+    const updatedNotes = await getNotes(userId!);
+    setNotes(updatedNotes);
   }
 
   const userId = session?.user?.id;
@@ -99,14 +102,14 @@ export function TodaysNotesSection({ session }: NotesProps) {
         <NoteDialog
           onSave={async (noteData) => {
             await handleSaveNote(noteData);
-            const updatedNotes = await getNotes(userId);
+            const updatedNotes = await getNotes(userId!);
             setNotes(updatedNotes);
           }}
         />
       </CardHeader>
       <CardContent className="sm:min-h-90.5 flex flex-col justify-between">
         <div className="space-y-4">
-          {isLoading && <p>Loading notes...</p>}
+          {isLoading && <p className="text-sm">Loading notes...</p>}
           {error && <p className="text-red-500 text-sm">{error}</p>}
           {!isLoading && !error && currentNotes.length === 0 ? (
             <p className="text-muted-foreground text-sm">No notes yet. Create your first note!</p>
@@ -117,7 +120,7 @@ export function TodaysNotesSection({ session }: NotesProps) {
                 note={note}
                 onSave={async (noteData) => {
                   await handleSaveNote(noteData);
-                  const updatedNotes = await getNotes(userId);
+                  const updatedNotes = await getNotes(userId!);
                   setNotes(updatedNotes);
                 }}
                 trigger={
@@ -127,14 +130,15 @@ export function TodaysNotesSection({ session }: NotesProps) {
                         <h3 className="font-medium dark:text-white">{note.title}</h3>
                         <div className="flex items-center space-x-1">
                           <span className="text-xs dark:text-gray-400">
-                            {note?.createdAt ? new Date(note.createdAt).toLocaleDateString() : 'No date'}
+                            {note?.createdAt ? new Date(note.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'No date'}
                           </span>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-6 w-6 p-0 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600"
+                            className="h-6 w-6 cursor-pointer p-0 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600"
                             onClick={(e) => {
                               e.stopPropagation()
+                              handleDeleteNote(note.id)
                               // Add delete functionality here
                             }}
                           >
@@ -154,31 +158,29 @@ export function TodaysNotesSection({ session }: NotesProps) {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center mt-6 space-x-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={prevPage}
-              disabled={currentPage === 0}
-              className="cursor-pointer border-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 bg-transparent"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <span className="text-sm text-gray-400">
-              {currentPage + 1} / {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={nextPage}
-              disabled={currentPage === totalPages - 1}
-              className="cursor-pointer border-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 bg-transparent"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        )}
+        <div className="flex justify-center items-center mt-6 space-x-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={prevPage}
+            disabled={currentPage === 0}
+            className="cursor-pointer border-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 bg-transparent"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <span className="text-sm text-gray-400">
+            {currentPage + 1} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={nextPage}
+            disabled={currentPage === totalPages - 1}
+            className="cursor-pointer border-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 bg-transparent"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )

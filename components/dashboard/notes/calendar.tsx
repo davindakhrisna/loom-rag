@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default function CalendarSection() {
   const [date, setDate] = React.useState<Date | undefined>(new Date())
   return (
-    <Card className="mb-8 min-h-117">
+    <Card className="mb-8 min-h-118">
       <CardHeader className="flex flex-col items-center justify-center">
         <CardTitle className="text-xl dark:text-white">Progress Calendar</CardTitle>
         <CardDescription>Shows how your progress been going</CardDescription>

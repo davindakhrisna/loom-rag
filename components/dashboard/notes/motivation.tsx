@@ -1,15 +1,54 @@
+"use client"
 
 import Link from "next/link"
 import { Heart, Asterisk, Star } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Session } from "next-auth"
+import { useEffect, useState } from "react"
+import { getLevel } from "@/lib/dashboard/notes/motivation/actions"
 
-export function ActionButton() {
+interface MotivationProps {
+  session: Session | null;
+}
+
+export function ActionButton({ session }: MotivationProps) {
+  const [level, setLevel] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchLevel = async () => {
+      if (!session?.user?.id) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const userLevel = await getLevel(session.user.id);
+        setLevel(userLevel);
+      } catch (err) {
+        console.error('Failed to fetch level:', err);
+        setError('Failed to load level');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLevel();
+  }, [session?.user?.id]);
+
   return (
     <Button className="w-full cursor-pointer">
       <Link href="/dashboard" className="w-full flex items-center justify-center gap-1">
         <Asterisk />
-        Your Current Level: 69
+        {isLoading ? (
+          'Loading level...'
+        ) : error ? (
+          'Error loading level'
+        ) : (
+          `Your Current Level: ${level}`
+        )}
       </Link>
     </Button>
   )

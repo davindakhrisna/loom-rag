@@ -1,7 +1,8 @@
 'use server'
 import { prisma } from '@/lib/prisma'
-import { Note } from '@/types/notes'
+import { CreateNoteData, UpdateNoteData } from '@/types/notes'
 
+// Fetch Notes
 export async function getNotes(userId: string) {
   try {
     const notes = await prisma.note.findMany({
@@ -15,19 +16,7 @@ export async function getNotes(userId: string) {
   }
 }
 
-type CreateNoteData = {
-  title: string;
-  description: string | null;
-  content: string;
-};
-
-type UpdateNoteData = {
-  id: string;
-  title: string;
-  description: string | null;
-  content: string;
-};
-
+// Create Note
 export async function createNote(noteData: CreateNoteData, userId: string) {
   try {
     const note = await prisma.note.create({
@@ -45,12 +34,12 @@ export async function createNote(noteData: CreateNoteData, userId: string) {
   }
 }
 
-export async function updateNote(noteData: UpdateNoteData, userId: string) {
+// Update Note
+export async function updateNote(noteData: UpdateNoteData) {
   try {
     const note = await prisma.note.update({
-      where: { 
+      where: {
         id: noteData.id,
-        userId
       },
       data: {
         title: noteData.title,
@@ -62,5 +51,20 @@ export async function updateNote(noteData: UpdateNoteData, userId: string) {
   } catch (error) {
     console.error('Error updating note:', error);
     throw new Error('Failed to update note');
+  }
+}
+
+// Delete Note
+export async function deleteNote(noteId: string) {
+  try {
+    const deleteNote = await prisma.note.delete({
+      where: {
+        id: noteId,
+      }
+    })
+    return deleteNote;
+  } catch (error) {
+    console.error('Error delete note:', error);
+    throw new Error('Failed to delete note');
   }
 }

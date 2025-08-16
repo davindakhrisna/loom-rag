@@ -118,7 +118,7 @@ export function AppSidebar({ session, ...props }: AppSidebarProps) {
                     alt="logo"
                     width={36}
                     height={36}
-
+                    priority={true}
                     className="w-full h-full object-cover rounded-lg"
                   />
                 </div>
