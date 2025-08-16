@@ -1,6 +1,12 @@
-import { TodoListSection, ActionButton, TodaysNotesSection, MotivationBlock, CalendarSection } from "@/components/dashboard/notes/notes";
+import CalendarSection from "@/components/dashboard/notes/calendar";
+import TodoListSection from "@/components/dashboard/notes/todo";
+import { TodaysNotesSection } from "@/components/dashboard/notes/notes";
+import { ActionButton, MotivationBlock, ActionCommunity } from "@/components/dashboard/notes/motivation";
+import { auth } from "@/auth"
 
-const Notes = () => {
+const Notes = async () => {
+  const session = await auth();
+
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-6xl mx-auto">
@@ -10,17 +16,16 @@ const Notes = () => {
         </div >
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Section - Takes 2 columns on large screens */}
           <div className="lg:col-span-2 space-y-6">
             <TodoListSection />
-            <TodaysNotesSection />
+            <TodaysNotesSection session={session} />
           </div>
 
-          {/* Right Section - Takes 1 column on large screens */}
           <div className="space-y-6">
             <MotivationBlock />
             <ActionButton />
             <CalendarSection />
+            <ActionCommunity />
           </div>
         </div>
       </div>

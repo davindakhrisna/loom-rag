@@ -7,7 +7,7 @@ export default function Home() {
     <div className="relative">
       <Navbar />
       <LetterGlitch
-        glitchColors={["white", "black", "transparent", "transparent", "transparent", "transparent", "transparent", "transparent", "transparent", "transparent", "transparent", "transparent"]}
+        glitchColors={["white", "black"]}
         glitchSpeed={12}
         smooth={true}
         outerVignette={true}

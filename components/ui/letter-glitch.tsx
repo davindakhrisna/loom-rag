@@ -2,9 +2,9 @@
 "use client";
 import { useRef, useEffect, useCallback } from "react";
 
-const FONT_SIZE = 16;
-const CHAR_WIDTH = 10;
-const CHAR_HEIGHT = 20;
+const FONT_SIZE = 12;
+const CHAR_WIDTH = 10; // Increased from 10 to 16
+const CHAR_HEIGHT = 20; // Increased from 20 to 28
 const CHARACTER_SET =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*()-_{}[]:;<>,.?/";
 class Particle {
@@ -172,14 +172,21 @@ const useMatrixAnimation = (
       context.font = `${FONT_SIZE}px monospace`;
       context.textBaseline = "top";
 
-      grid.cols = Math.ceil(width / CHAR_WIDTH);
-      grid.rows = Math.ceil(height / CHAR_HEIGHT);
+      // Reduce grid density by increasing spacing
+      const horizontalSpacing = 1.8; // Add horizontal spacing between characters
+      const verticalSpacing = 1.5;   // Add vertical spacing between lines
+
+      grid.cols = Math.floor(width / (CHAR_WIDTH * horizontalSpacing));
+      grid.rows = Math.floor(height / (CHAR_HEIGHT * verticalSpacing));
 
       particlesRef.current = [];
+      const offsetX = (width - (grid.cols * CHAR_WIDTH * horizontalSpacing)) / 2;
+      const offsetY = (height - (grid.rows * CHAR_HEIGHT * verticalSpacing)) / 2;
+
       for (let row = 0; row < grid.rows; row++) {
         for (let col = 0; col < grid.cols; col++) {
-          const x = col * CHAR_WIDTH;
-          const y = row * CHAR_HEIGHT;
+          const x = offsetX + col * (CHAR_WIDTH * horizontalSpacing);
+          const y = offsetY + row * (CHAR_HEIGHT * verticalSpacing);
           const char =
             CHARACTER_SET[Math.floor(Math.random() * CHARACTER_SET.length)];
           const color = getRandomColorMemoized();
