@@ -4,15 +4,11 @@ import Link from "next/link"
 import { Heart, Asterisk, Book } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Session } from "next-auth"
+import { SessionProps } from "@/types/session"
 import { useEffect, useState } from "react"
 import { getLevel } from "@/lib/dashboard/notes/motivation/actions"
 
-interface MotivationProps {
-  session: Session | null;
-}
-
-export function ActionButton({ session }: MotivationProps) {
+export function ActionButton({ session }: SessionProps) {
   const [level, setLevel] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

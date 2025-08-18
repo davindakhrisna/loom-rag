@@ -1,73 +1,123 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Plus, X, Sunrise, Moon, Sun } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import {
+  getTodos,
+  createTodo,
+  deleteTodo,
+  toggleTodo,
+  getOrCreateTodayTodo
+} from "@/lib/dashboard/notes/todo/actions"
+import { SessionProps } from "@/types/session"
+import { TimeSlotType, TodoState, Period } from "@/types/todo"
 
-export default function TodoListSection() {
+export default function TodoListSection({ session }: SessionProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [activeTimeSlot, setActiveTimeSlot] = useState<"morning" | "noon" | "evening">("morning")
-  const [todos, setTodos] = useState({
-    morning: [
-      { id: 1, text: "Review daily goals", completed: false },
-      { id: 2, text: "Check emails", completed: true },
-      { id: 3, text: "Morning workout", completed: false },
-    ],
-    noon: [
-      { id: 4, text: "Team meeting", completed: false },
-      { id: 5, text: "Project review", completed: true },
-      { id: 6, text: "Lunch break", completed: false },
-    ],
-    evening: [
-      { id: 7, text: "Wrap up tasks", completed: false },
-      { id: 8, text: "Plan tomorrow", completed: false },
-      { id: 9, text: "Personal time", completed: true },
-    ],
+  const [activeTimeSlot, setActiveTimeSlot] = useState<TimeSlotType>("morning")
+  const [todos, setTodos] = useState<TodoState>({
+    morning: [],
+    noon: [],
+    evening: []
   })
   const [newTodo, setNewTodo] = useState("")
+  const [currentTodoId, setCurrentTodoId] = useState<string | null>(null)
 
-  const openDrawer = (timeSlot: "morning" | "noon" | "evening") => {
+  useEffect(() => {
+    const loadTodos = async () => {
+      if (!session?.user?.id) return
+
+      try {
+        // Get or create today's todo and set the ID
+        const todo = await getOrCreateTodayTodo(session.user.id)
+        setCurrentTodoId(todo.id)
+
+        // Fetch all time slots for today
+        const timeSlots = await getTodos(session.user.id)
+
+        // Transform time slots into the expected state format
+        const formattedTodos = timeSlots.reduce((acc, slot) => {
+          const period = slot.period.toLowerCase() as TimeSlotType
+          if (!acc[period]) acc[period] = []
+
+          acc[period].push({
+            ...slot,
+            text: slot.text || ''
+          })
+          return acc
+        }, {} as TodoState)
+
+        setTodos({
+          morning: formattedTodos.morning || [],
+          noon: formattedTodos.noon || [],
+          evening: formattedTodos.evening || []
+        })
+      } catch (error) {
+        console.error('Error loading todos:', error)
+      }
+    }
+
+    loadTodos()
+  }, [session?.user?.id])
+
+  const openDrawer = (timeSlot: TimeSlotType) => {
     setActiveTimeSlot(timeSlot)
     setIsDrawerOpen(true)
   }
 
-  const toggleTodo = (id: number) => {
-    setTodos((prev) => ({
-      ...prev,
-      [activeTimeSlot]: prev[activeTimeSlot].map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo,
-      ),
-    }))
-  }
-
-  const addTodo = () => {
-    if (newTodo.trim()) {
-      const newId =
-        Math.max(
-          ...Object.values(todos)
-            .flat()
-            .map((t) => t.id),
-        ) + 1
-      setTodos((prev) => ({
+  const handleToggleTodo = async (id: string, completed: boolean) => {
+    try {
+      await toggleTodo(id, completed)
+      setTodos(prev => ({
         ...prev,
-        [activeTimeSlot]: [...prev[activeTimeSlot], { id: newId, text: newTodo.trim(), completed: false }],
+        [activeTimeSlot]: prev[activeTimeSlot].map(todo =>
+          todo.id === id ? { ...todo, completed: !completed } : todo
+        )
       }))
-      setNewTodo("")
+    } catch (error) {
+      console.error('Error toggling todo:', error)
     }
   }
 
-  const deleteTodo = (id: number) => {
-    setTodos((prev) => ({
-      ...prev,
-      [activeTimeSlot]: prev[activeTimeSlot].filter((todo) => todo.id !== id),
-    }))
+  const handleAddTodo = async () => {
+    if (!newTodo.trim() || !currentTodoId) return
+
+    try {
+      const period = activeTimeSlot.charAt(0).toUpperCase() + activeTimeSlot.slice(1) as Period
+      const newTodoItem = await createTodo(currentTodoId, period, newTodo.trim())
+
+      setTodos(prev => ({
+        ...prev,
+        [activeTimeSlot]: [
+          ...prev[activeTimeSlot],
+          { ...newTodoItem, text: newTodoItem.text || '' }
+        ]
+      }))
+
+      setNewTodo("")
+    } catch (error) {
+      console.error('Error adding todo:', error)
+    }
   }
 
-  const getTimeSlotTitle = (slot: string) => {
+  const handleDeleteTodo = async (id: string) => {
+    try {
+      await deleteTodo(id)
+      setTodos(prev => ({
+        ...prev,
+        [activeTimeSlot]: prev[activeTimeSlot].filter(todo => todo.id !== id)
+      }))
+    } catch (error) {
+      console.error('Error deleting todo:', error)
+    }
+  }
+
+  const getTimeSlotTitle = (slot: TimeSlotType) => {
     switch (slot) {
       case "morning":
         return "Morning Tasks"
@@ -80,7 +130,7 @@ export default function TodoListSection() {
     }
   }
 
-  const getTimeSlotIcon = (slot: string) => {
+  const getTimeSlotIcon = (slot: TimeSlotType) => {
     switch (slot) {
       case "morning":
         return <Sunrise className="w-5 h-5" />
@@ -107,7 +157,7 @@ export default function TodoListSection() {
               onClick={() => openDrawer("morning")}
             >
               <CardContent className="flex flex-col justify-center items-center gap-2">
-                <Sunrise />
+                <Sunrise className="w-6 h-6" />
               </CardContent>
             </Card>
 
@@ -117,7 +167,7 @@ export default function TodoListSection() {
               onClick={() => openDrawer("noon")}
             >
               <CardContent className="flex flex-col justify-center items-center gap-2">
-                <Sun />
+                <Sun className="w-6 h-6" />
               </CardContent>
             </Card>
 
@@ -127,7 +177,7 @@ export default function TodoListSection() {
               onClick={() => openDrawer("evening")}
             >
               <CardContent className="flex flex-col justify-center items-center gap-2">
-                <Moon />
+                <Moon className="w-6 h-6" />
               </CardContent>
             </Card>
           </div>
@@ -156,48 +206,61 @@ export default function TodoListSection() {
           </SheetHeader>
 
           <div className="flex-1 flex flex-col mt-6 min-h-0">
-            <div className="flex gap-2 flex-shrink-0 mb-4">
+            <div className="flex gap-2 mb-4">
               <Input
                 placeholder="Add a new task..."
                 value={newTodo}
                 onChange={(e) => setNewTodo(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && addTodo()}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddTodo()}
                 maxLength={32}
                 className="flex-1"
               />
-              <Button onClick={addTodo} size="sm">
+              <Button
+                onClick={handleAddTodo}
+                size="sm"
+                disabled={!newTodo.trim()}
+              >
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
 
             <div className="text-xs text-muted-foreground mb-4 flex-shrink-0">{newTodo.length}/32 characters</div>
 
-            <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-              {todos[activeTimeSlot].map((todo) => (
-                <div key={todo.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
-                  <Checkbox
-                    id={`todo-${todo.id}`}
-                    checked={todo.completed}
-                    onCheckedChange={() => toggleTodo(todo.id)}
-                    className="mt-0.5 flex-shrink-0 cursor-pointer"
-                  />
-                  <label
-                    htmlFor={`todo-${todo.id}`}
-                    className={`flex-1 text-sm cursor-pointer break-words leading-relaxed ${todo.completed ? "line-through text-muted-foreground" : ""
-                      }`}
-                  >
-                    {todo.text}
-                  </label>
+            <div className="space-y-2 overflow-y-auto flex-1">
+              {todos[activeTimeSlot]?.map((todo) => (
+                <Card
+                  key={todo.id}
+                  className="flex flex-row items-center justify-between p-3"
+                >
+                  <div className="flex items-center space-x-3">
+                    <Checkbox
+                      id={`todo-${todo.id}`}
+                      checked={todo.completed}
+                      onCheckedChange={() => handleToggleTodo(todo.id, todo.completed)}
+                      className="cursor-pointer"
+                    />
+                    <label
+                      htmlFor={`todo-${todo.id}`}
+                      className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1 ${todo.completed ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-gray-100'}`}
+                    >
+                      {todo.text}
+                    </label>
+                  </div>
                   <Button
                     variant="ghost"
-                    size="sm"
-                    onClick={() => deleteTodo(todo.id)}
-                    className="h-8 w-8 p-0 text-muted-foreground cursor-pointer hover:text-destructive flex-shrink-0"
+                    size="icon"
+                    className="h-8 w-8 cursor-pointer text-gray-400 hover:text-red-500 dark:hover:text-red-400"
+                    onClick={() => handleDeleteTodo(todo.id)}
                   >
-                    <X className="w-4 h-4" />
+                    <X className="h-4 w-4" />
                   </Button>
-                </div>
+                </Card>
               ))}
+              {todos[activeTimeSlot]?.length === 0 && (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p className="text-sm">No tasks yet. Add one above!</p>
+                </div>
+              )}
             </div>
 
             <div className="mt-4 p-4 rounded-lg bg-muted flex-shrink-0">

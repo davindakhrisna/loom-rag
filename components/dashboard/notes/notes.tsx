@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Session } from "next-auth"
+import { SessionProps } from "@/types/session"
 import { getNotes, createNote, updateNote, deleteNote } from '@/lib/dashboard/notes/note/actions'
 import { CreateNoteData, UpdateNoteData } from '@/types/notes'
 import { ChevronLeft, X, ChevronRight } from "lucide-react"
@@ -10,11 +10,7 @@ import { NoteDialog } from "@/components/dashboard/notes/note-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Note } from "@/types/notes"
 
-interface NotesProps {
-  session: Session | null;
-}
-
-export function TodaysNotesSection({ session }: NotesProps) {
+export function TodaysNotesSection({ session }: SessionProps) {
   const [notes, setNotes] = useState<Note[]>([])
   const [currentPage, setCurrentPage] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
