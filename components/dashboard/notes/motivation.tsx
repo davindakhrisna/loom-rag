@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Heart, Asterisk, Star } from "lucide-react"
+import { Heart, Asterisk, Book } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Session } from "next-auth"
@@ -74,10 +74,10 @@ export function MotivationBlock() {
 
 export function ActionCommunity() {
   return (
-    <Button className="w-full cursor-pointer p-7" variant="outline">
-      <Link href="/community" className="w-full flex items-center justify-center gap-1">
-        <Star />
-        See how others are going
+    <Button className="w-full cursor-pointer p-8" variant="outline">
+      <Link href="/dashboard" className="w-full flex items-center justify-center gap-1">
+        <Book />
+        See All Your Notes
       </Link>
     </Button>
   )

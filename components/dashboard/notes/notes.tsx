@@ -175,7 +175,7 @@ export function TodaysNotesSection({ session }: NotesProps) {
             variant="outline"
             size="sm"
             onClick={nextPage}
-            disabled={currentPage === totalPages - 1}
+            disabled={currentPage === totalPages - 1 || notes.length <= 3}
             className="cursor-pointer border-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 bg-transparent"
           >
             <ChevronRight className="w-4 h-4" />

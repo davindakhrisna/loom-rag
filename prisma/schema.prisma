@@ -48,6 +48,8 @@ model Todo {
   id        String      @id @default(cuid()) // Primary Key
   userId    String // Foreign Key
   slots     TimeSlot[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relation
   user      User        @relation(fields: [userId], references: [id])

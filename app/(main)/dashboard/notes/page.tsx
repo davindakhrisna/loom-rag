@@ -21,7 +21,7 @@ const Notes = async () => {
             <TodaysNotesSection session={session} />
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-6 mb-8">
             <MotivationBlock />
             <ActionButton session={session} />
             <CalendarSection />

@@ -5,14 +5,29 @@ import { CreateNoteData, UpdateNoteData } from '@/types/notes'
 // Fetch Notes
 export async function getNotes(userId: string) {
   try {
+    // Get today's date at 00:00:00
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Get tomorrow's date at 00:00:00
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    
     const notes = await prisma.note.findMany({
-      where: { userId },
+      where: { 
+        userId,
+        createdAt: {
+          gte: today,    // Greater than or equal to today 00:00:00
+          lt: tomorrow   // Less than tomorrow 00:00:00
+        }
+      },
       orderBy: { createdAt: 'desc' },
-    })
-    return notes
+    });
+    
+    return notes;
   } catch (error) {
-    console.error('Error fetching notes:', error)
-    return []
+    console.error('Error fetching notes:', error);
+    return [];
   }
 }
 
