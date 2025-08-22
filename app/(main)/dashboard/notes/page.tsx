@@ -12,7 +12,7 @@ const Notes = async () => {
       <div className="max-w-6xl mx-auto">
         < div className="text-center py-8" >
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Your Notes</h1>
-          <p className="text-gray-600 dark:text-gray-400">Manage focus and progress</p>
+          <p className="text-gray-600 dark:text-gray-400">Manage your focus and progress</p>
         </div >
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -24,7 +24,7 @@ const Notes = async () => {
           <div className="space-y-6 mb-8">
             <MotivationBlock />
             <ActionButton session={session} />
-            <CalendarSection session={session}/>
+            <CalendarSection session={session} />
             <ActionCommunity />
           </div>
         </div>
