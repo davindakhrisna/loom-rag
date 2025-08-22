@@ -1,7 +1,7 @@
+import MistralPage from "@/components/mistral/mistral-ui";
+
 const Mistral = () => {
-  return (
-    <div></div>
-  )
+  return <MistralPage />
 }
 
 export default Mistral
